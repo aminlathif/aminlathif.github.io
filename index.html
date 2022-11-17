@@ -1,0 +1,433 @@
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<style>
+*{
+    text-align: center;
+    font-family: 'Inter';
+    color: whitesmoke;
+}
+body{
+    border: solid #03226100;
+    width: 500px;
+    height: 500px;
+    margin-top: 8px;
+    background: url("tampilan awal (1).png");
+    background-size: cover;
+}
+.border{
+    padding: 15% 15%;
+}
+div{
+    margin: 2% auto;
+}
+#tampilanAwal{
+    animation: Abody 1s;
+    position: absolute;
+    top:350px;
+    left: 500px;
+}
+#LEVEL{
+    position: absolute;
+    top:350px;
+    left: 500px;
+}
+button{
+    width: 282px;
+    height: 45.63px;
+    background: black;;
+    
+    
+    font-style: normal;
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 24px;
+}
+button:active{
+    background: rgb(63, 63, 63);
+}
+#pemain{
+    position: absolute;
+    top:350px;
+    left: 500px;
+}
+#pemain img{
+    height: 100px;
+    width: 100px;
+}
+#volume{
+    position: absolute;
+    width: 500px;
+    height: 550px;
+    top: 70%;
+    left: 51%;
+    transform: translate(-50%,-50%);
+    border-radius: 119px;
+    background: antiquewhite;
+}
+.X{
+    position: absolute;
+    left: 75%;
+    top: 5%;
+    font-size: 40px;
+    color: red;
+    font-family: Verdana, Geneva, Tahoma, sans-serif;
+    font-weight: 900;
+}
+input[type=range]{
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%,-50%);
+    accent-color: black;
+    width: 200px;
+}
+#restart{
+    position: fixed;
+    border-radius: 119px;
+    width: 400px;
+    height: 250px;
+    top: 50%;
+    left: 51%;
+    transform: translate(-50%,-50%);
+}
+canvas {
+    border:1px solid black;
+}
+</style>
+</head>
+<body>
+    <div class="border">
+        <div id="pemain" style="display: none; color:rgba(35, 196, 13, 0.938)">
+            <h2>PILIH PEMAIN</h2>
+            <img src="player0.png">
+            <img src="player1.png">
+            <img src="player2.png">
+        </div>
+        <div id="tampilanAwal">
+            <button onclick="milihlvl()" style="margin-bottom: 2%;">MULAI</button>
+        </div>
+        <div id="LEVEL" style="display: none">
+            <button onclick="level(1)">LEVEL 1</button><br><br>
+            <button onclick="level(2)">LEVEL 2</button><br><br>
+            <button onclick="level(3)">LEVEL 3</button>
+        </div>
+        <div  id="volume" style="display: none;" >
+            <p style="font-size: 25px;">PENGATURAN</p>
+            <h2>AUDIO</h2>
+            <input type="range" min="0" max="100" step="1" value="50"><br><span class="X">X</span><br>
+            <a href="https://www.instagram.com/_ilhmsr_">CREATOR</a>
+        </div>
+    </div>
+    <div id="restart" style="display: none;">
+        <h1>GAME OVER</h1>
+        <h1>SCORE:<span id="skor">0</span></h1>
+        <button onclick="startGame()">RESTART</button>
+    </div>
+<script>
+//variable
+var myGamePiece;
+var myBackground;
+var myObstacles = [];
+var myScore;
+var mySound;
+var myMusic;
+var volumeslider = 0.5;
+var suara = document.querySelector('#volume input');
+var player = document.querySelectorAll('div#pemain img');
+var LEVEL = document.getElementById('LEVEL');
+
+//MENGHAPUS DIV TERTENTU
+function UI(){
+    document.querySelector('#tampilanAwal').style.display = "none";
+    document.querySelector('#restart').style.display = "none";
+}
+function milihlvl(){
+    LEVEL.style.display = '';
+    UI();
+}
+//MILIH LEVEL
+function level(parameter){
+    lvl = parameter;
+    choose();
+}
+//MILIH PEMAIN
+function choose(){
+    UI();
+    document.getElementById('pemain').style.display = "";
+    LEVEL.style.display = 'none';
+}
+for(let i=0; i<player.length; i++){
+    player[i].addEventListener('mouseenter',function(e){
+        e.target.style.filter = 'drop-shadow(0px 0px 15px black)'
+    })
+    player[i].addEventListener('mouseleave',function(e){
+        e.target.style.filter = ''
+    })
+    player[i].addEventListener('click', function(){
+        iPlayer = i;
+        startGame();
+    })
+}
+function pengaturan(){
+    UI();
+    document.getElementById('volume').style.display= '';
+    setTimeout(function(){
+        document.getElementById('volume').style.animation= 'none';
+    },1000)
+    suara.addEventListener('input', function(){//MENGATUR VOLUME SUARA DENGAN INPUT RANGE
+        volumeslider = suara.value / 100;
+    });
+}
+document.addEventListener('click', function(e){//MENUTUP MENU SETTING
+    if(e.target === document.querySelector('#volume .X')){
+            document.querySelector('#tampilanAwal').style.display = "";
+            document.querySelector('#volume').style.display = "none";
+    }
+})
+function startGame() {//AWAL MULAI PERSIAPAN
+    myGamePiece = new component(80, 80, "player"+iPlayer+".png", 10, 300,"image");
+    if(lvl==3){
+        myBackground = new component(1360, 600, "bacground api.png", 0, 0, "image");
+    }else if(lvl==2){
+        myBackground = new component(1360, 600, "background.png", 0, 0, "image");
+    }else{
+        myBackground = new component(1360, 600, "bacground tong.png", 0, 0, "image");
+    }
+    myGamePiece.gravity = 0.05;
+    myScore = new component("30px", "Inter", "antiquewhite", 630, 40, "text");
+    myGameArea.start();
+    mySound = new sound('music.mp3');
+    myMusic = new sound(".mp3");
+    
+    UI();
+    document.querySelector('#pemain').style.display = "none";
+    document.querySelector('.border').style.display = "none";
+    myObstacles.splice(0, myObstacles.length);
+}
+
+var myGameArea = { //MEMBUAT CANVAS
+    canvas : document.createElement("canvas"),
+    start : function() {
+        this.canvas.width = 1360;
+        this.canvas.height = 600;
+        this.context = this.canvas.getContext("2d");
+        document.body.insertBefore(this.canvas, document.body.childNodes[0]);
+        this.frameNo = 0;
+        this.interval = setInterval(updateGameArea, 20);
+          },
+    clear : function() {
+        this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+    },
+    stop : function() {
+        clearInterval(this.interval);
+        document.getElementById('restart').style.display = "";
+        document.getElementById('skor').innerHTML = this.frameNo;
+    }
+}
+//MENGATUR COMOPONENT OBJEK DENGAN PARAMETER
+function component(width, height, color, x, y, type) {
+    this.type=type;
+    if(type=="image"){
+        this.image = new Image();
+        this.image.src = color;
+    }
+    this.type = type;
+    this.width = width;
+    this.height = height;
+    this.speedX = 0;
+    this.speedY = 0;    
+    this.x = x;
+    this.y = y;
+    this.gravity = 0.1;//gravitasinya
+    this.gravitySpeed = 0;//kecepatan turunnya
+    this.bounce = 0.2;
+
+    this.update = function() {
+        ctx = myGameArea.context;
+        if (this.type == "text") {
+            ctx.font = this.width + " " + this.height;
+            ctx.fillStyle = color;
+            ctx.fillText(this.text, this.x, this.y);
+    }
+    if (type == "image") {
+      ctx.drawImage(this.image,
+        this.x,
+        this.y,
+        this.width, this.height);
+    }  else {
+            ctx.fillStyle = color;
+            ctx.fillRect(this.x, this.y, this.width, this.height);
+        }
+    }
+    this.newPos = function() {
+        this.gravitySpeed += this.gravity;
+        this.x += this.speedX;
+        this.y += this.speedY + this.gravitySpeed;
+        this.hitBottom();
+        this.hitTop();
+    }
+    this.hitBottom = function() { //MENAHAN PLAYER (BAGIAN BAWAH) KELUAR CANVAS
+    var rockbottom = myGameArea.canvas.height - this.height;
+    if (this.y > rockbottom) {
+      this.y = rockbottom;
+      this.gravitySpeed = -(this.gravitySpeed * this.bounce);
+    }
+  }
+    this.hitTop = function() { //MENAHAN PLAYER (BAGIAN ATAS) KELUAR CANVAS
+    var rocktop = 0;
+    if (this.y < rocktop) {
+      this.y = rocktop;
+      this.gravitySpeed = this.bounce;
+    }
+  }
+    
+    this.crashWith = function(otherobj) {
+        var myleft = this.x;
+        var myright = this.x + (this.width);
+        var mytop = this.y;
+        var mybottom = this.y + (this.height);
+        var otherleft = otherobj.x;
+        var otherright = otherobj.x + (otherobj.width);
+        var othertop = otherobj.y;
+        var otherbottom = otherobj.y + (otherobj.height);
+        var crash = true;
+        if ((mybottom < othertop) || (mytop > otherbottom) || (myright < otherleft) || (myleft > otherright)) {
+            crash = false;
+        }
+        return crash;
+    }
+}
+
+function updateGameArea() {
+    var x, height, gap, minHeight, maxHeight, minGap, maxGap;
+    for (i = 0; i < myObstacles.length; i += 1) {
+         //KETIKA KARAKTER MENABRAK OBSTACLE
+        if (myGamePiece.crashWith(myObstacles[i])) {
+            mySound.play();
+            myMusic.stop();
+            myGameArea.stop();
+            return;
+        } 
+    }
+    
+    if(myGameArea.frameNo==5000){
+        myMusic.stop();
+        myGameArea.stop();
+        document.querySelector('#restart h1').innerHTML = "SELAMAT";
+    }
+    myGameArea.clear();
+    myBackground.newPos();
+    myBackground.update();
+    myGameArea.frameNo += 1;
+    if(lvl==3){
+        if (myGameArea.frameNo == 1 || everyinterval(40)) {//MENGEKSEKUSI KODE TIAP INTERVAL 120
+                x = myGameArea.canvas.width;                    //MENGAMBIL LEBAR CANVAS SEBAGAI VARIABEL X
+                size = Math.random()*(100-30)+30;               //UKURAN YANG RANDOM
+                size2 = Math.random()*(100-30)+30;              //UKURAN YANG RANDOM V2
+                i = Math.round(Math.random()*2+1);              //index obs
+                random = Math.floor(Math.random()*300);         //POSISI RANDOM 
+                random1 = Math.floor(Math.random()*300+290);    //POSISI RANDOM V2
+                myObstacles.push(new component(size, size, "api.png", x, random, "image"));//Posisi tertinggi 0
+                myObstacles.push(new component(size2, size2, "api.png", x+80, random1,"image"));//Posisi terendah 600
+                if(everyinterval(240)){
+                    size3 = Math.random()*(120-40)+40; //UKURAN YANG RANDOM V3
+                    myObstacles.push(new component(size3, size3, "api.png", x+140, random+160,"image"));   
+                }
+            }
+        for (i = 0; i < myObstacles.length; i += 1) {
+            //KECEPATAN OBSTACLE
+            myObstacles[i].x += -10; 
+            myObstacles[i].update();
+        }      
+    }else if(lvl==2){
+        if (myGameArea.frameNo == 1 || everyinterval(80)) {//MENGEKSEKUSI KODE TIAP INTERVAL 120
+                x = myGameArea.canvas.width;                    //MENGAMBIL LEBAR CANVAS SEBAGAI VARIABEL X
+                size = Math.random()*(100-30)+30;               //UKURAN YANG RANDOM
+                size2 = Math.random()*(100-30)+30;              //UKURAN YANG RANDOM V2
+                i = Math.round(Math.random()*2+1);              //index obs
+                random = Math.floor(Math.random()*300);         //POSISI RANDOM 
+                random1 = Math.floor(Math.random()*300+290);    //POSISI RANDOM V2
+                myObstacles.push(new component(size, size, "spike.png", x, random, "image"));//Posisi tertinggi 0
+                myObstacles.push(new component(size2, size2, "spike.png", x+80, myGameArea.canvas.height-size2,"image"));//Posisi terendah 600
+                if(everyinterval(240)){
+                    size3 = Math.random()*(120-40)+40; //UKURAN YANG RANDOM V3
+                    myObstacles.push(new component(size3, size3, "spike.png", x+140, random+160,"image"));   
+                }
+            }
+        for (i = 0; i < myObstacles.length; i += 1) {
+            //KECEPATAN OBSTACLE
+            myObstacles[i].x += -7.5; 
+            myObstacles[i].update();
+        }      
+    }else{
+        if (myGameArea.frameNo == 1 || everyinterval(160)) {//MENGEKSEKUSI KODE TIAP INTERVAL 120
+                x = myGameArea.canvas.width;                    //MENGAMBIL LEBAR CANVAS SEBAGAI VARIABEL X
+                size = Math.random()*(100-30)+30;               //UKURAN YANG RANDOM
+                size2 = Math.random()*(100-30)+30;              //UKURAN YANG RANDOM V2
+                i = Math.round(Math.random()*2+1);              //index obs
+                random = Math.floor(Math.random()*300);         //POSISI RANDOM 
+                random1 = Math.floor(Math.random()*300+290);    //POSISI RANDOM V2
+                myObstacles.push(new component(size, size, "tong.png", x, random, "image"));//Posisi tertinggi 0
+                myObstacles.push(new component(size2, size2, "tong.png", x+80, random1,"image"));//Posisi terendah 600
+                if(everyinterval(240)){
+                    size3 = Math.random()*(120-40)+40; //UKURAN YANG RANDOM V3
+                    myObstacles.push(new component(size3, size3, "tong.png", x+140, random+160,"image"));   
+                }
+            }
+        for (i = 0; i < myObstacles.length; i += 1) {
+            //KECEPATAN OBSTACLE
+            myObstacles[i].x += -3.5; 
+            myObstacles[i].update();
+        }      
+
+    }
+    //mengupdate skor ke canvas
+    myScore.text="SCORE: " + myGameArea.frameNo;
+    myScore.update();
+    //mengupdate posisi player
+    myGamePiece.newPos();  
+    myGamePiece.update();  
+    myMusic.play();//memutar musik
+}
+function sound(src) {       //PENGATURAN SUARA
+    this.sound = document.createElement("audio");
+    this.sound.src = src;
+    this.sound.setAttribute("preload", "auto");
+    this.sound.setAttribute("controls", "none");
+    this.sound.style.display = "none";
+    this.sound.volume = volumeslider;
+    document.body.appendChild(this.sound);
+ 
+    this.play = function(){
+        this.sound.play();
+    }
+    this.stop = function(){
+        this.sound.pause();
+    }    
+}
+
+function everyinterval(n) {//untuk naik turun karakter 
+    if ((myGameArea.frameNo / n) % 1 == 0) {return true;}
+    return false;
+}
+
+function accelerate(n) {
+    if (!myGameArea.interval) {myGameArea.interval = setInterval(updateGameArea, 20);}
+    
+    myGamePiece.gravity = n;
+}
+// CONTROLLER SPASI
+document.addEventListener('keydown', function(e) {
+    if(e.which===32){
+        accelerate(-0.2);//naik
+    }
+});
+document.addEventListener('keyup', function(e) {
+    if(e.which===32){
+        accelerate(0.1);//turun
+    }
+});
+</script>
+</body>
+</html>
